@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+
 	"myproject/database"
 	"myproject/routes"
 
@@ -9,11 +10,11 @@ import (
 )
 
 func main() {
-   // Initialize the database
-    if err := database.InitDB(); err != nil {
-        log.Fatalf("Failed to initialize database: %v", err)
-    }
-    r := gin.Default()
-    routes.SetupRoutes(r)
-    r.Run("localhost:8080")
+	// Initialize the database
+	if err := database.InitDB(); err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	r := gin.Default()
+	routes.SetupRoutes(r)
+	r.Run("localhost:8080")
 }
