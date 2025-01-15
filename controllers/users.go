@@ -60,11 +60,17 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	err := h.userRepo.CreateUser(&models.User{
+	passwordHash, err := utils.HashPassword(user.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.FormatDefaultError(err, "Error hashing password"))
+		return
+	}
+
+	err = h.userRepo.CreateUser(&models.User{
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
-		Password:  user.Password,
+		Password:  passwordHash,
 	})
 	if err != nil {
 		c.JSON(500, utils.FormatDefaultError(err, "Error creating user"))
@@ -91,7 +97,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	var user request.CreateUserDTO
+	var user request.UpdateUserDTO
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, utils.FormatValidationError(err))
@@ -101,7 +107,6 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	existingUser.FirstName = user.FirstName
 	existingUser.LastName = user.LastName
 	existingUser.Email = user.Email
-	existingUser.Password = user.Password
 
 	if err := h.userRepo.UpdateUser(existingUser); err != nil {
 		c.JSON(500, utils.FormatDefaultError(err, "Error updating user"))
