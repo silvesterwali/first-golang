@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"fmt"
+	"net/http"
 	"strconv"
 
 	"myproject/models"
 	"myproject/repositories"
 	"myproject/request"
+	"myproject/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,15 +25,11 @@ func NewAlbumHandler() *AlbumHandler {
 func (h *AlbumHandler) GetAlbums(c *gin.Context) {
 	albums, err := h.albumRepo.GetAllAlbums()
 	if err != nil {
-		c.JSON(500, gin.H{
-			"error": "Error fetching albums",
-		})
+		c.JSON(500, utils.FormatDefaultError(err, "Error fetching albums"))
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"albums": albums,
-	})
+	c.JSON(200, utils.ResponseData(albums))
 }
 
 func (h *AlbumHandler) GetAlbum(c *gin.Context) {
@@ -41,30 +38,24 @@ func (h *AlbumHandler) GetAlbum(c *gin.Context) {
 	// Convert string to int
 	albumId, err := strconv.Atoi(id)
 	if err != nil {
-		fmt.Println("Error:", err)
+		c.JSON(http.StatusBadRequest, utils.FormatDefaultError(err, "Invalid album ID"))
 		return
 	}
 
 	album, err := h.albumRepo.GetAlbumByID(albumId)
 	if err != nil {
-		c.JSON(404, gin.H{
-			"error": "Album not found",
-		})
+		c.JSON(http.StatusNotFound, utils.FormatDefaultError(err, "Album not found"))
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"album": album,
-	})
+	c.JSON(200, utils.ResponseData(album))
 }
 
 func (h *AlbumHandler) CreateAlbum(c *gin.Context) {
 	var album request.AlbumDTO
 
 	if err := c.ShouldBindJSON(&album); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Invalid request body",
-		})
+		c.JSON(http.StatusBadRequest, utils.FormatValidationError(err))
 		return
 	}
 
@@ -74,15 +65,11 @@ func (h *AlbumHandler) CreateAlbum(c *gin.Context) {
 		Price:  album.Price,
 	})
 	if err != nil {
-		c.JSON(500, gin.H{
-			"error": "Error creating album",
-		})
+		c.JSON(500, utils.FormatDefaultError(err, "Error creating album"))
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"albums": "albums",
-	})
+	c.JSON(200, utils.ResponseData(album))
 }
 
 func (h *AlbumHandler) UpdateAlbum(c *gin.Context) {
@@ -91,24 +78,20 @@ func (h *AlbumHandler) UpdateAlbum(c *gin.Context) {
 	// Convert string to int
 	albumId, err := strconv.Atoi(id)
 	if err != nil {
-		fmt.Println("Error:", err)
+		c.JSON(http.StatusBadRequest, utils.FormatDefaultError(err, "Invalid album ID"))
 		return
 	}
 
 	existingAlbum, err := h.albumRepo.GetAlbumByID(albumId)
 	if err != nil {
-		c.JSON(404, gin.H{
-			"error": "Album not found",
-		})
+		c.JSON(http.StatusNotFound, utils.FormatDefaultError(err, "Album not found"))
 		return
 	}
 
 	var album request.AlbumDTO
 
 	if err := c.ShouldBindJSON(&album); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Invalid request body",
-		})
+		c.JSON(http.StatusBadRequest, utils.FormatValidationError(err))
 		return
 	}
 
@@ -117,15 +100,11 @@ func (h *AlbumHandler) UpdateAlbum(c *gin.Context) {
 	existingAlbum.Price = album.Price
 
 	if err := h.albumRepo.UpdateAlbum(existingAlbum); err != nil {
-		c.JSON(500, gin.H{
-			"error": "Error updating album",
-		})
+		c.JSON(500, utils.FormatDefaultError(err, "Error updating album"))
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"albums": "albums",
-	})
+	c.JSON(http.StatusOK, utils.ResponseData(existingAlbum))
 }
 
 func (h *AlbumHandler) DeleteAlbum(c *gin.Context) {
@@ -134,26 +113,20 @@ func (h *AlbumHandler) DeleteAlbum(c *gin.Context) {
 	// Convert string to int
 	albumId, err := strconv.Atoi(id)
 	if err != nil {
-		fmt.Println("Error:", err)
+		c.JSON(http.StatusBadRequest, utils.FormatDefaultError(err, "Invalid album ID"))
 		return
 	}
 
 	existingAlbum, err := h.albumRepo.GetAlbumByID(albumId)
 	if err != nil {
-		c.JSON(404, gin.H{
-			"error": "Album not found",
-		})
+		c.JSON(http.StatusNotFound, utils.FormatDefaultError(err, "Album not found"))
 		return
 	}
 
 	if err := h.albumRepo.DeleteAlbumByID(existingAlbum); err != nil {
-		c.JSON(500, gin.H{
-			"error": "Error deleting album",
-		})
+		c.JSON(500, utils.FormatDefaultError(err, "Error deleting album"))
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"albums": "albums",
-	})
+	c.JSON(http.StatusOK, utils.ResponseData(existingAlbum))
 }

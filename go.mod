@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/gin-gonic/gin v1.10.0
+	github.com/go-playground/validator/v10 v10.24.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.24 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	gorm.io/driver/sqlite v1.5.7 // indirect

@@ -8,6 +8,7 @@ import (
 	"myproject/models"
 	"myproject/repositories"
 	"myproject/request"
+	"myproject/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,15 +26,11 @@ func NewUserHandler() *UserHandler {
 func (h *UserHandler) GetUsers(c *gin.Context) {
 	users, err := h.userRepo.GetAllUsers()
 	if err != nil {
-		c.JSON(500, gin.H{
-			"error": "Error fetching users",
-		})
+		c.JSON(500, utils.FormatDefaultError(err, "Error fetching users"))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"users": users,
-	})
+	c.JSON(http.StatusOK, utils.ResponseData(users))
 }
 
 func (h *UserHandler) GetUser(c *gin.Context) {
@@ -48,24 +45,18 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 
 	user, err := h.userRepo.GetUserByID(userId)
 	if err != nil {
-		c.JSON(404, gin.H{
-			"error": "User not found",
-		})
+		c.JSON(http.StatusNotFound, utils.FormatDefaultError(err, "User not found"))
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"user": user,
-	})
+	c.JSON(http.StatusOK, utils.ResponseData(user))
 }
 
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var user request.CreateUserDTO
 
-	if err := c.BindJSON(&user); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Invalid request body",
-		})
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, utils.FormatValidationError(err))
 		return
 	}
 
@@ -76,15 +67,11 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		Password:  user.Password,
 	})
 	if err != nil {
-		c.JSON(500, gin.H{
-			"error": "Error creating user",
-		})
+		c.JSON(500, utils.FormatDefaultError(err, "Error creating user"))
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"users": "users",
-	})
+	c.JSON(http.StatusCreated, utils.ResponseData(user))
 }
 
 func (h *UserHandler) UpdateUser(c *gin.Context) {
@@ -100,16 +87,14 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	// Fetch the existing user
 	existingUser, err := h.userRepo.GetUserByID(userId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, utils.FormatDefaultError(err, "User not found"))
 		return
 	}
 
 	var user request.CreateUserDTO
 
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(400, gin.H{
-			"error": "Invalid request body",
-		})
+		c.JSON(http.StatusBadRequest, utils.FormatValidationError(err))
 		return
 	}
 
@@ -119,12 +104,10 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	existingUser.Password = user.Password
 
 	if err := h.userRepo.UpdateUser(existingUser); err != nil {
-		c.JSON(500, gin.H{
-			"error": "Error updating user",
-		})
+		c.JSON(500, utils.FormatDefaultError(err, "Error updating user"))
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully", "user": existingUser})
+	c.JSON(http.StatusOK, utils.ResponseData(existingUser))
 }
 
 func (h *UserHandler) DeleteUser(c *gin.Context) {
@@ -140,18 +123,14 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 
 	existingUser, err := h.userRepo.GetUserByID(userId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, utils.FormatDefaultError(err, "User not found"))
 		return
 	}
 
 	if err := h.userRepo.DeleteUserByID(existingUser); err != nil {
-		c.JSON(500, gin.H{
-			"error": "Error deleting user",
-		})
+		c.JSON(500, utils.FormatDefaultError(err, "Error deleting user"))
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"users": "users",
-	})
+	c.JSON(200, utils.ResponseData(existingUser))
 }

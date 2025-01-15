@@ -41,3 +41,9 @@ func (u *UserRepository) DeleteUserByID(user *models.User) error {
 	err := u.db.Delete(&user).Error
 	return err
 }
+
+func (u *UserRepository) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+	err := u.db.Where("email = ?", email).First(&user).Error
+	return &user, err
+}
