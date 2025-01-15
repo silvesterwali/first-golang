@@ -2,6 +2,7 @@ package routes
 
 import (
 	"myproject/controllers"
+	"myproject/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,13 @@ func SetupRoutes(r *gin.Engine) {
 			albums.POST("/", controllers.NewAlbumHandler().CreateAlbum)
 			albums.PUT("/:id", controllers.NewAlbumHandler().UpdateAlbum)
 			albums.DELETE("/:id", controllers.NewAlbumHandler().DeleteAlbum)
+		}
+
+		auth := api.Group("/auth")
+		{
+			auth.POST("/login", controllers.NewAuthHandler().Login)
+			auth.Use(middleware.Auth())
+			auth.GET("/profile", controllers.NewAuthHandler().Profile)
 		}
 
 	}

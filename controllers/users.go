@@ -77,7 +77,11 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, utils.ResponseData(utils.RemoveField(user, []string{"password"})))
+	c.JSON(http.StatusCreated, utils.ResponseData(map[string]interface{}{
+		"firstName": user.FirstName,
+		"lastName":  user.LastName,
+		"email":     user.Email,
+	}))
 }
 
 func (h *UserHandler) UpdateUser(c *gin.Context) {
@@ -112,7 +116,11 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		c.JSON(500, utils.FormatDefaultError(err, "Error updating user"))
 		return
 	}
-	c.JSON(http.StatusOK, utils.ResponseData(utils.RemoveField(existingUser, []string{"password"})))
+	c.JSON(http.StatusOK, utils.ResponseData(map[string]interface{}{
+		"firstName": existingUser.FirstName,
+		"lastName":  existingUser.LastName,
+		"email":     existingUser.Email,
+	}))
 }
 
 func (h *UserHandler) DeleteUser(c *gin.Context) {
@@ -137,5 +145,5 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, utils.ResponseData(utils.RemoveField(existingUser, []string{"password"})))
+	c.JSON(200, utils.ResponseData(utils.RemoveField(existingUser, []string{"password", "Password"})))
 }
