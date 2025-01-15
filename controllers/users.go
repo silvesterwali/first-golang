@@ -71,7 +71,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, utils.ResponseData(user))
+	c.JSON(http.StatusCreated, utils.ResponseData(utils.RemoveField(user, []string{"password"})))
 }
 
 func (h *UserHandler) UpdateUser(c *gin.Context) {
@@ -107,7 +107,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		c.JSON(500, utils.FormatDefaultError(err, "Error updating user"))
 		return
 	}
-	c.JSON(http.StatusOK, utils.ResponseData(existingUser))
+	c.JSON(http.StatusOK, utils.ResponseData(utils.RemoveField(existingUser, []string{"password"})))
 }
 
 func (h *UserHandler) DeleteUser(c *gin.Context) {
@@ -132,5 +132,5 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, utils.ResponseData(existingUser))
+	c.JSON(200, utils.ResponseData(utils.RemoveField(existingUser, []string{"password"})))
 }

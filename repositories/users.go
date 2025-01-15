@@ -17,7 +17,7 @@ func NewUserRepository() *UserRepository {
 
 func (u *UserRepository) GetAllUsers() ([]models.User, error) {
 	var users []models.User
-	err := u.db.Find(&users).Error
+	err := u.db.Select("id", "first_name", "last_name", "email", "created_at", "updated_at").Find(&users).Error
 	return users, err
 }
 
